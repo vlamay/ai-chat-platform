@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, DateTime, ForeignKey, Integer, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, DateTime, ForeignKey, Integer, func, Uuid
 from sqlalchemy.orm import relationship
 import uuid
 from app.core.database import Base
@@ -8,8 +7,8 @@ from app.core.database import Base
 class Message(Base):
     __tablename__ = "messages"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    chat_id = Column(UUID(as_uuid=True), ForeignKey("chats.id", ondelete="CASCADE"), nullable=False)
+    id = Column(Uuid(as_uuid=True, native_uuid=False), primary_key=True, default=uuid.uuid4)
+    chat_id = Column(Uuid(as_uuid=True, native_uuid=False), ForeignKey("chats.id", ondelete="CASCADE"), nullable=False)
     role = Column(String, nullable=False)  # 'user' or 'assistant'
     content = Column(String, nullable=False)
     tokens_used = Column(Integer, nullable=True)

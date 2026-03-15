@@ -10,14 +10,6 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     dsn: import.meta.env.VITE_SENTRY_DSN,
     environment: import.meta.env.MODE,
     tracesSampleRate: 0.1,
-    integrations: [
-      new Sentry.Replay({
-        maskAllText: true,
-        blockAllMedia: true,
-      }),
-    ],
-    replaysSessionSampleRate: 0.1,
-    replaysOnErrorSampleRate: 1.0,
   })
 }
 

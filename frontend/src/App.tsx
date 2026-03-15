@@ -12,7 +12,7 @@ function AppContent() {
 
   useEffect(() => {
     loadFromLocalStorage();
-  }, []);
+  }, [loadFromLocalStorage]);
 
   return (
     <BrowserRouter>

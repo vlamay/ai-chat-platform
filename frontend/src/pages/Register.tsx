@@ -28,8 +28,9 @@ export const Register: React.FC = () => {
       const data = await authAPI.register(email, name, password);
       setAuth(data.user, data.access_token, data.refresh_token);
       navigate("/");
-    } catch (err: any) {
-      setError(err.response?.data?.detail || "Registration failed");
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { detail?: string } } };
+      setError(error.response?.data?.detail || "Registration failed");
     } finally {
       setLoading(false);
     }

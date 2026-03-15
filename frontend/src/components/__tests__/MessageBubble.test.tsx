@@ -1,3 +1,4 @@
+import React from 'react'
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MessageBubble } from '../MessageBubble'
@@ -30,7 +31,7 @@ describe('MessageBubble', () => {
 
     render(<MessageBubble message={message} />)
 
-    const container = screen.getByText(/Bold text/).parentElement
+    const container = screen.getByText(/Bold text/)?.parentElement?.parentElement
     expect(container).toHaveClass('prose')
   })
 

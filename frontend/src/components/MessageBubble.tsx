@@ -13,6 +13,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const htmlContent = marked(message.content, {
     breaks: true,
     gfm: true,
+    async: false,
   });
 
   return (
@@ -29,7 +30,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         ) : message.content || isStreaming ? (
           <div
             className="prose dark:prose-invert max-w-none text-sm"
-            dangerouslySetInnerHTML={{ __html: htmlContent as string }}
+            dangerouslySetInnerHTML={{ __html: htmlContent }}
           />
         ) : (
           <div className="flex gap-1 py-1">

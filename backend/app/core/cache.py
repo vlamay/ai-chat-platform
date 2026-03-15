@@ -2,8 +2,8 @@
 Cache configuration and utilities for Redis caching
 """
 import logging
-from fastapi_cache2 import FastAPICache
-from fastapi_cache2.backends.redis import RedisBackend
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from app.core.config import settings
 

@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, DateTime, ForeignKey, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, DateTime, ForeignKey, func, Uuid
 from sqlalchemy.orm import relationship
 import uuid
 from app.core.database import Base
@@ -8,8 +7,8 @@ from app.core.database import Base
 class Chat(Base):
     __tablename__ = "chats"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    id = Column(Uuid(as_uuid=True, native_uuid=False), primary_key=True, default=uuid.uuid4)
+    user_id = Column(Uuid(as_uuid=True, native_uuid=False), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     title = Column(String, nullable=False, default="New Chat")
     model = Column(String, nullable=False, default="claude-haiku-4-5-20251001")
     created_at = Column(DateTime(timezone=True), server_default=func.now())

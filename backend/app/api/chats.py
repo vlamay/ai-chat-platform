@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Header, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func, delete
-from fastapi_cache2.decorators import cache
+from fastapi_cache.decorator import cache
 from app.core.database import get_db
 from app.models import Chat, Message, User
 from app.schemas.chat import ChatCreate, ChatResponse, ChatListResponse, ChatUpdate
