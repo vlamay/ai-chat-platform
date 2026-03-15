@@ -8,6 +8,7 @@ interface MessageBubbleProps {
 
 export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isUser = message.role === "user";
+  const isStreaming = message.id === "streaming";
 
   const htmlContent = marked(message.content, {
     breaks: true,
@@ -25,11 +26,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
       >
         {isUser ? (
           <p className="whitespace-pre-wrap">{message.content}</p>
-        ) : (
+        ) : message.content || isStreaming ? (
           <div
             className="prose dark:prose-invert max-w-none text-sm"
             dangerouslySetInnerHTML={{ __html: htmlContent as string }}
           />
+        ) : (
+          <div className="flex gap-1 py-1">
+            <span className="inline-block w-2 h-2 bg-current rounded-full animate-bounce" />
+            <span className="inline-block w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
+            <span className="inline-block w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
+          </div>
         )}
         <p className="text-xs opacity-75 mt-1">
           {new Date(message.created_at).toLocaleTimeString([], {

@@ -1,9 +1,11 @@
 import logging
 import sys
+import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
+from secure import Secure
 from app.core.config import settings
 from app.core.database import Base, engine
 # Import models before creating the app so they register with Base.metadata
@@ -20,11 +22,31 @@ logger = logging.getLogger(__name__)
 
 logger.info("Imports completed successfully")
 
-# Create FastAPI app
+# Initialize Sentry for error tracking
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        traces_sample_rate=0.2,
+        environment="production" if not settings.DEBUG else "development",
+    )
+    logger.info("✓ Sentry error tracking initialized")
+else:
+    logger.info("Sentry DSN not configured, skipping error tracking")
+
+# Create FastAPI app with enhanced documentation
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="AI Chat Platform with Claude API",
+    description="Real-time AI chat platform powered by Claude API. Stream conversations, manage multiple chats, and leverage advanced language models.",
+    contact={
+        "name": "Vladyslav Maidaniuk",
+        "email": "vla.maidaniuk@gmail.com",
+    },
+    openapi_tags=[
+        {"name": "auth", "description": "Authentication — register, login, token refresh"},
+        {"name": "chats", "description": "Chat sessions CRUD"},
+        {"name": "messages", "description": "Messages and Claude AI streaming"},
+    ],
 )
 
 # Add CORS middleware
@@ -36,11 +58,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add security headers middleware
+secure_headers = Secure()
+
+
+@app.middleware("http")
+async def set_secure_headers(request: Request, call_next):
+    """Add security headers to all responses"""
+    response = await call_next(request)
+    secure_headers.framework.fastapi(response)
+    return response
+
 
 # Application startup
 @app.on_event("startup")
 async def startup_event():
     """Initialize application on startup"""
+    from app.core.cache import init_cache
+
     logger.info("=" * 50)
     logger.info("FastAPI application STARTING")
     logger.info(f"Project: {settings.PROJECT_NAME}")
@@ -55,6 +90,9 @@ async def startup_event():
         logger.info("✓ Database connection SUCCESSFUL")
     except Exception as e:
         logger.error(f"✗ Database connection FAILED: {str(e)}")
+
+    # Initialize cache
+    await init_cache()
 
     logger.info("FastAPI application READY to handle requests")
     logger.info("=" * 50)

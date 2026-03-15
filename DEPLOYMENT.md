@@ -7,6 +7,27 @@ This guide covers deploying the AI Chat Platform to production using:
 - **Backend**: Railway (free tier available)
 - **Database**: Railway PostgreSQL
 
+## Environment Variables (Updated)
+
+### Railway (Backend)
+
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | ✅ auto | Set by Railway PostgreSQL plugin |
+| `SECRET_KEY` | ✅ | Random 32+ character string for JWT signing |
+| `ANTHROPIC_API_KEY` | ✅ | From https://console.anthropic.com |
+| `SENTRY_DSN` | optional | From https://sentry.io for error tracking |
+| `REDIS_URL` | optional | From Railway Redis plugin for caching |
+| `ALLOWED_ORIGINS` | optional | Comma-separated list of frontend URLs (e.g., https://your-app.vercel.app) |
+| `DEBUG` | optional | Set to `false` in production |
+
+### Vercel (Frontend)
+
+| Variable | Required | Description |
+|---|---|---|
+| `VITE_API_URL` | ✅ | Railway backend URL + `/api/v1` |
+| `VITE_SENTRY_DSN` | optional | Frontend Sentry DSN (separate from backend) |
+
 ## Prerequisites
 
 1. **GitHub Account**: Push your repo to GitHub
@@ -38,11 +59,18 @@ git push -u origin main
 In Railway Dashboard for Backend:
 ```
 DATABASE_URL=postgresql+asyncpg://[user]:[password]@[host]:[port]/[database]
-SECRET_KEY=generate-a-random-string-here
+SECRET_KEY=generate-a-random-string-min-32-chars-here
 ANTHROPIC_API_KEY=sk-ant-xxx...
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=7
+DEBUG=false
+SENTRY_DSN=https://your-key@sentry.io/project-id
+REDIS_URL=redis://[user]:[password]@[host]:[port]
+ALLOWED_ORIGINS=https://your-app.vercel.app,https://www.your-app.com
 ```
+
+See the **Environment Variables** section above for complete variable reference.
+
 
 ### 2.3 Add PostgreSQL
 

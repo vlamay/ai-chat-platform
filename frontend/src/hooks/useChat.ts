@@ -75,6 +75,16 @@ export const useChat = () => {
         };
         setMessages((prev) => [...prev, userMessage]);
 
+        // Add streaming placeholder BEFORE starting the reader loop
+        const streamingMessage: Message = {
+          id: 'streaming',
+          chat_id: currentChat.id,
+          role: 'assistant',
+          content: '',
+          created_at: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, streamingMessage]);
+
         // Stream response
         const stream = await chatsAPI.streamMessage(currentChat.id, content);
         const reader = stream.getReader();
@@ -95,11 +105,9 @@ export const useChat = () => {
               // Update streaming message in real-time
               setMessages((prev) => {
                 const updated = [...prev];
-                const lastMsg = updated[updated.length - 1];
-                if (lastMsg?.role === "assistant" && lastMsg?.id === "streaming") {
-                  lastMsg.content = assistantContent;
-                }
-                return updated;
+                const last = updated.find(m => m.id === 'streaming');
+                if (last) last.content = assistantContent;
+                return [...updated];
               });
             }
           }

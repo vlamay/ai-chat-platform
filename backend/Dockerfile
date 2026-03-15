@@ -24,6 +24,6 @@ USER appuser
 # Expose port (Railway will use PORT env variable)
 EXPOSE 8000
 
-# Run with verbose logging
+# Run migrations and start app with verbose logging
 # Railway sets PORT env variable, so we use it via shell expansion
-CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --log-level info"
+CMD sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --log-level info"

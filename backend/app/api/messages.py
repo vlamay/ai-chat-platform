@@ -1,36 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from datetime import datetime
+from fastapi_cache2.decorators import cache
 from app.core.database import get_db
-from app.models import Chat, Message, User
+from app.models import Chat, Message
 from app.schemas.chat import MessageCreateRequest, MessageResponse
-from app.services.auth import decode_token, get_user_by_id
+from app.api.deps import get_current_user_from_header
 from app.services.claude import stream_claude_response
 
 router = APIRouter(prefix="/messages", tags=["messages"])
 
 
-async def get_current_user_from_header(
-    authorization: str = Header(None), db: AsyncSession = Depends(get_db)
-) -> User:
-    """Extract user from Authorization header"""
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-
-    token = authorization.replace("Bearer ", "")
-    payload = decode_token(token)
-    if not payload:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-
-    user = await get_user_by_id(db, payload.get("sub"))
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-
-    return user
-
-
 @router.get("/{chat_id}", response_model=list[MessageResponse])
+@cache(expire=60)  # Cache for 1 minute
 async def get_messages(
     chat_id: str,
     authorization: str = Header(None),

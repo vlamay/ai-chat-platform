@@ -1,4 +1,5 @@
 import React from "react";
+import { useAuthStore } from "../store/authStore";
 import type { ChatListItem } from "../types";
 
 interface SidebarProps {
@@ -8,6 +9,7 @@ interface SidebarProps {
   onNewChat: () => void;
   onDeleteChat: (chatId: string) => void;
   onLogout: () => void;
+  loading?: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -17,12 +19,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onNewChat,
   onDeleteChat,
   onLogout,
+  loading = false,
 }) => {
+  const { user } = useAuthStore();
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   return (
     <div className="w-64 bg-slate-100 dark:bg-slate-800 border-r border-slate-300 dark:border-slate-700
       flex flex-col h-full">
-      {/* New Chat Button */}
+      {/* Branding */}
       <div className="p-4 border-b border-slate-300 dark:border-slate-700">
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
+          🤖 AI Chat
+        </h1>
         <button
           onClick={onNewChat}
           className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg
@@ -34,7 +51,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Chats List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {chats.length === 0 ? (
+        {loading && chats.length === 0 ? (
+          // Skeleton loading
+          <>
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="p-3 rounded-lg bg-slate-200 dark:bg-slate-700 animate-pulse"
+              >
+                <div className="h-4 bg-slate-300 dark:bg-slate-600 rounded mb-2" />
+                <div className="h-3 bg-slate-300 dark:bg-slate-600 rounded w-1/2" />
+              </div>
+            ))}
+          </>
+        ) : chats.length === 0 ? (
           <p className="text-sm text-slate-500 text-center py-8">No chats yet</p>
         ) : (
           chats.map((chat) => (
@@ -71,8 +101,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
 
-      {/* Logout */}
-      <div className="p-4 border-t border-slate-300 dark:border-slate-700">
+      {/* User Profile Footer */}
+      <div className="border-t border-slate-300 dark:border-slate-700 p-4 space-y-3">
+        {user && (
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium text-sm">
+              {getInitials(user.name)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                {user.name}
+              </p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
+                {user.email}
+              </p>
+            </div>
+          </div>
+        )}
         <button
           onClick={onLogout}
           className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition"

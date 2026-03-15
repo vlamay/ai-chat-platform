@@ -29,15 +29,17 @@ class Settings(BaseSettings):
     # Claude API
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
 
+    # Sentry
+    SENTRY_DSN: str = os.getenv("SENTRY_DSN", "")
+
+    # Redis Caching
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379")
+
     # CORS
-    ALLOWED_ORIGINS: list = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-        "https://ai-chat-platform-liard.vercel.app",
-    ]
+    ALLOWED_ORIGINS: list = os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:3000,http://localhost:5173,http://localhost,http://127.0.0.1:3000,http://127.0.0.1:5173,https://ai-chat-platform-liard.vercel.app"
+    ).split(",")
 
     class Config:
         env_file = ".env"

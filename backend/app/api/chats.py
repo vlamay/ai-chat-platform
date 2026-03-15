@@ -1,32 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func, delete
+from fastapi_cache2.decorators import cache
 from app.core.database import get_db
 from app.models import Chat, Message, User
 from app.schemas.chat import ChatCreate, ChatResponse, ChatListResponse, ChatUpdate
-from app.services.auth import decode_token, get_user_by_id
+from app.api.deps import get_current_user_from_header
 
 router = APIRouter(prefix="/chats", tags=["chats"])
-
-
-async def get_current_user_from_header(
-    authorization: str = Header(None), db: AsyncSession = Depends(get_db)
-) -> User:
-    """Extract user from Authorization header"""
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-
-    token = authorization.replace("Bearer ", "")
-    payload = decode_token(token)
-    if not payload:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-
-    user = await get_user_by_id(db, payload.get("sub"))
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-
-    return user
 
 
 @router.post("", response_model=ChatResponse, status_code=status.HTTP_201_CREATED)
@@ -56,6 +38,7 @@ async def create_chat(
 
 
 @router.get("", response_model=list[ChatListResponse])
+@cache(expire=300)  # Cache for 5 minutes
 async def list_chats(
     authorization: str = Header(None),
     db: AsyncSession = Depends(get_db),
