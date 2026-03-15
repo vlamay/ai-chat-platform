@@ -1,15 +1,23 @@
 import pytest
 import pytest_asyncio
+import os
+import asyncio
+import sys
+
+# Mock the database engine before importing app modules
+os.environ['DATABASE_URL'] = "sqlite+aiosqlite:///:memory:"
+
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.orm import declarative_base
 from httpx import AsyncClient, ASGITransport
-from fastapi_cache2 import FastAPICache
-from fastapi_cache2.backends.in_memory import InMemoryBackend
-from app.core.config import settings
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
+
+# Import app modules that need the database
 from app.core.database import Base, get_db
 from app.main import app
 from app.models import User, Chat, Message
 from app.services.auth import create_tokens
-import asyncio
 
 
 # Override database URL for tests

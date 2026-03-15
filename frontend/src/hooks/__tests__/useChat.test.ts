@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useChat } from '../useChat'
-import type { Message } from '../../types'
 
 // Mock the chats API
 vi.mock('../../api/chats', () => ({
