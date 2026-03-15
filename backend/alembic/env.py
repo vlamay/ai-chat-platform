@@ -43,10 +43,20 @@ def run_migrations_offline() -> None:
 
 def do_run_migrations(connection):
     """Execute migrations with async connection."""
+    import logging
+    migration_logger = logging.getLogger("alembic.runtime.migration")
+
+    migration_logger.info("Starting migration execution...")
     context.configure(connection=connection, target_metadata=target_metadata)
 
-    with context.begin_transaction():
-        context.run_migrations()
+    try:
+        with context.begin_transaction():
+            context.run_migrations()
+        migration_logger.info("Migration execution completed")
+    except Exception as e:
+        migration_logger.error(f"Migration error: {str(e)}")
+        # Re-raise to be caught by run_migrations_online
+        raise
 
 
 async def run_migrations_online() -> None:
