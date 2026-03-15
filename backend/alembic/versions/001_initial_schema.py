@@ -8,6 +8,7 @@ Create Date: 2026-03-15
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+from sqlalchemy import inspect
 
 # revision identifiers, used by Alembic.
 revision = '001'
@@ -16,9 +17,16 @@ branch_labels = None
 depends_on = None
 
 
+def table_exists(table_name: str) -> bool:
+    """Check if table exists in current database"""
+    bind = op.get_bind()
+    inspector = inspect(bind)
+    return table_name in inspector.get_table_names()
+
+
 def upgrade() -> None:
-    try:
-        # Create users table
+    # Create users table
+    if not table_exists('users'):
         op.create_table(
             'users',
             sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -31,12 +39,9 @@ def upgrade() -> None:
             sa.UniqueConstraint('email')
         )
         op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
-    except Exception:
-        # Table already exists, skip
-        pass
 
-    try:
-        # Create chats table
+    # Create chats table
+    if not table_exists('chats'):
         op.create_table(
             'chats',
             sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -48,12 +53,9 @@ def upgrade() -> None:
             sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
             sa.PrimaryKeyConstraint('id')
         )
-    except Exception:
-        # Table already exists, skip
-        pass
 
-    try:
-        # Create messages table
+    # Create messages table
+    if not table_exists('messages'):
         op.create_table(
             'messages',
             sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -65,9 +67,6 @@ def upgrade() -> None:
             sa.ForeignKeyConstraint(['chat_id'], ['chats.id'], ondelete='CASCADE'),
             sa.PrimaryKeyConstraint('id')
         )
-    except Exception:
-        # Table already exists, skip
-        pass
 
 
 def downgrade() -> None:
