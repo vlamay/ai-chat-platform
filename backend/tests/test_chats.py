@@ -19,7 +19,7 @@ async def test_create_chat_authenticated(async_client: AsyncClient, test_user_to
     data = response.json()
     assert data["title"] == "New Chat"
     assert data["model"] == "claude-3-sonnet-20240229"
-    assert data["user_id"] == test_user_tokens["user_id"]
+    assert data["user_id"] == str(test_user_tokens["user_id"])
     assert "id" in data
 
 
@@ -60,7 +60,7 @@ async def test_list_chats_with_data(
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
-    assert data[0]["id"] == test_chat.id
+    assert data[0]["id"] == str(test_chat.id)
     assert data[0]["title"] == test_chat.title
     assert data[0]["message_count"] == 1
 
@@ -74,7 +74,7 @@ async def test_get_chat_own(async_client: AsyncClient, test_user_tokens, test_ch
     )
     assert response.status_code == 200
     data = response.json()
-    assert data["id"] == test_chat.id
+    assert data["id"] == str(test_chat.id)
     assert data["title"] == test_chat.title
 
 

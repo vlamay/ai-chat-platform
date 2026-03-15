@@ -1,7 +1,9 @@
 import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from httpx import AsyncClient
+from httpx import AsyncClient, ASGITransport
+from fastapi_cache2 import FastAPICache
+from fastapi_cache2.backends.in_memory import InMemoryBackend
 from app.core.config import settings
 from app.core.database import Base, get_db
 from app.main import app
@@ -12,6 +14,9 @@ import asyncio
 
 # Override database URL for tests
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+# Initialize cache for tests
+FastAPICache.init(InMemoryBackend(), prefix="test-cache")
 
 
 @pytest_asyncio.fixture
@@ -59,7 +64,7 @@ async def override_get_db(test_db_session):
 @pytest_asyncio.fixture
 async def async_client(override_get_db):
     """Create async test client"""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         yield client
 
 
@@ -103,9 +108,3 @@ async def test_message(test_db_session, test_chat):
     return message
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    """Create event loop for async tests"""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()

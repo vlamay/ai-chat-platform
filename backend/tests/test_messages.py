@@ -28,7 +28,7 @@ async def test_get_messages_authenticated(
     assert response.status_code == 200
     data = response.json()
     assert len(data) == 1
-    assert data[0]["id"] == test_message.id
+    assert data[0]["id"] == str(test_message.id)
     assert data[0]["content"] == "Hello!"
     assert data[0]["role"] == "user"
 
@@ -57,7 +57,7 @@ async def test_get_messages_wrong_chat(
 @pytest.mark.asyncio
 async def test_stream_message_mocked(async_client: AsyncClient, test_user_tokens, test_chat):
     """Test streaming a message with mocked Claude API"""
-    with patch("app.services.claude.stream_claude_response") as mock_stream:
+    with patch("app.api.messages.stream_claude_response") as mock_stream:
         # Mock the stream to return a simple response
         async def mock_generator(*args, **kwargs):
             yield "Hello"
