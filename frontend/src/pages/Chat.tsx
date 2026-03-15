@@ -28,7 +28,7 @@ export const Chat: React.FC = () => {
       return;
     }
     loadChats();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, navigate, loadChats]);
 
   const handleLogout = () => {
     logout();
