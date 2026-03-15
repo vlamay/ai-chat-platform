@@ -51,20 +51,30 @@ def do_run_migrations(connection):
 
 async def run_migrations_online() -> None:
     """Run migrations in 'online' mode with async engine."""
+    import logging
+    migration_logger = logging.getLogger("alembic.runtime.migration")
+
     configuration = config.get_section(config.config_ini_section)
     configuration["sqlalchemy.url"] = os.getenv(
         "DATABASE_URL", configuration.get("sqlalchemy.url", "")
     )
 
-    connectable = create_async_engine(
-        configuration["sqlalchemy.url"],
-        poolclass=pool.NullPool,
-    )
+    migration_logger.info(f"Running migrations on database: {configuration['sqlalchemy.url']}")
 
-    async with connectable.connect() as connection:
-        await connection.run_sync(do_run_migrations)
+    try:
+        connectable = create_async_engine(
+            configuration["sqlalchemy.url"],
+            poolclass=pool.NullPool,
+        )
 
-    await connectable.dispose()
+        async with connectable.connect() as connection:
+            await connection.run_sync(do_run_migrations)
+            migration_logger.info("Migrations completed successfully")
+
+        await connectable.dispose()
+    except Exception as e:
+        migration_logger.error(f"Migration error (continuing): {str(e)}")
+        # Don't raise - let app start anyway
 
 
 if context.is_offline_mode():

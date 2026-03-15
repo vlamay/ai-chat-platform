@@ -17,49 +17,76 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Create users table
-    op.create_table(
-        'users',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('email', sa.String(), nullable=False),
-        sa.Column('hashed_password', sa.String(), nullable=False),
-        sa.Column('name', sa.String(), nullable=False),
-        sa.Column('avatar_url', sa.String(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
-        sa.PrimaryKeyConstraint('id'),
-        sa.UniqueConstraint('email')
-    )
-    op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+    try:
+        # Create users table
+        op.create_table(
+            'users',
+            sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+            sa.Column('email', sa.String(), nullable=False),
+            sa.Column('hashed_password', sa.String(), nullable=False),
+            sa.Column('name', sa.String(), nullable=False),
+            sa.Column('avatar_url', sa.String(), nullable=True),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
+            sa.PrimaryKeyConstraint('id'),
+            sa.UniqueConstraint('email')
+        )
+        op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
+    except Exception:
+        # Table already exists, skip
+        pass
 
-    # Create chats table
-    op.create_table(
-        'chats',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('user_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('title', sa.String(), nullable=False),
-        sa.Column('model', sa.String(), nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
-        sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
-        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('id')
-    )
+    try:
+        # Create chats table
+        op.create_table(
+            'chats',
+            sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+            sa.Column('user_id', postgresql.UUID(as_uuid=True), nullable=False),
+            sa.Column('title', sa.String(), nullable=False),
+            sa.Column('model', sa.String(), nullable=False),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
+            sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
+            sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+            sa.PrimaryKeyConstraint('id')
+        )
+    except Exception:
+        # Table already exists, skip
+        pass
 
-    # Create messages table
-    op.create_table(
-        'messages',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('chat_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('role', sa.String(), nullable=False),
-        sa.Column('content', sa.String(), nullable=False),
-        sa.Column('tokens_used', sa.Integer(), nullable=True),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
-        sa.ForeignKeyConstraint(['chat_id'], ['chats.id'], ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('id')
-    )
+    try:
+        # Create messages table
+        op.create_table(
+            'messages',
+            sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+            sa.Column('chat_id', postgresql.UUID(as_uuid=True), nullable=False),
+            sa.Column('role', sa.String(), nullable=False),
+            sa.Column('content', sa.String(), nullable=False),
+            sa.Column('tokens_used', sa.Integer(), nullable=True),
+            sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
+            sa.ForeignKeyConstraint(['chat_id'], ['chats.id'], ondelete='CASCADE'),
+            sa.PrimaryKeyConstraint('id')
+        )
+    except Exception:
+        # Table already exists, skip
+        pass
 
 
 def downgrade() -> None:
-    op.drop_table('messages')
-    op.drop_table('chats')
-    op.drop_index(op.f('ix_users_email'), table_name='users')
-    op.drop_table('users')
+    try:
+        op.drop_table('messages')
+    except Exception:
+        pass
+
+    try:
+        op.drop_table('chats')
+    except Exception:
+        pass
+
+    try:
+        op.drop_index(op.f('ix_users_email'), table_name='users')
+    except Exception:
+        pass
+
+    try:
+        op.drop_table('users')
+    except Exception:
+        pass

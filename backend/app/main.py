@@ -90,9 +90,13 @@ async def startup_event():
         logger.info("✓ Database connection SUCCESSFUL")
     except Exception as e:
         logger.error(f"✗ Database connection FAILED: {str(e)}")
+        # Continue anyway - migrations might fix the connection
 
-    # Initialize cache
-    await init_cache()
+    # Initialize cache (ignore errors if Redis unavailable)
+    try:
+        await init_cache()
+    except Exception as e:
+        logger.warning(f"Cache initialization failed: {str(e)}")
 
     logger.info("FastAPI application READY to handle requests")
     logger.info("=" * 50)
