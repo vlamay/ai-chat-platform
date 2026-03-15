@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func
+from sqlalchemy import func, delete
 from app.core.database import get_db
 from app.models import Chat, Message, User
 from app.schemas.chat import ChatCreate, ChatResponse, ChatListResponse, ChatUpdate
@@ -11,7 +11,7 @@ router = APIRouter(prefix="/chats", tags=["chats"])
 
 
 async def get_current_user_from_header(
-    authorization: str = None, db: AsyncSession = Depends(get_db)
+    authorization: str = Header(None), db: AsyncSession = Depends(get_db)
 ) -> User:
     """Extract user from Authorization header"""
     if not authorization or not authorization.startswith("Bearer "):
@@ -32,7 +32,7 @@ async def get_current_user_from_header(
 @router.post("", response_model=ChatResponse, status_code=status.HTTP_201_CREATED)
 async def create_chat(
     chat_data: ChatCreate,
-    authorization: str = None,
+    authorization: str = Header(None),
     db: AsyncSession = Depends(get_db),
 ):
     user = await get_current_user_from_header(authorization, db)
@@ -42,12 +42,22 @@ async def create_chat(
     await db.commit()
     await db.refresh(chat)
 
-    return chat
+    # Return chat without messages to avoid lazy-loading issues
+    response = ChatResponse(
+        id=chat.id,
+        user_id=chat.user_id,
+        title=chat.title,
+        model=chat.model,
+        created_at=chat.created_at,
+        updated_at=chat.updated_at,
+        messages=[]
+    )
+    return response
 
 
 @router.get("", response_model=list[ChatListResponse])
 async def list_chats(
-    authorization: str = None,
+    authorization: str = Header(None),
     db: AsyncSession = Depends(get_db),
 ):
     user = await get_current_user_from_header(authorization, db)
@@ -79,7 +89,7 @@ async def list_chats(
 @router.get("/{chat_id}", response_model=ChatResponse)
 async def get_chat(
     chat_id: str,
-    authorization: str = None,
+    authorization: str = Header(None),
     db: AsyncSession = Depends(get_db),
 ):
     user = await get_current_user_from_header(authorization, db)
@@ -92,14 +102,24 @@ async def get_chat(
     if not chat:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found")
 
-    return chat
+    # Return chat without messages to avoid lazy-loading issues
+    response = ChatResponse(
+        id=chat.id,
+        user_id=chat.user_id,
+        title=chat.title,
+        model=chat.model,
+        created_at=chat.created_at,
+        updated_at=chat.updated_at,
+        messages=[]
+    )
+    return response
 
 
 @router.patch("/{chat_id}", response_model=ChatResponse)
 async def update_chat(
     chat_id: str,
     chat_data: ChatUpdate,
-    authorization: str = None,
+    authorization: str = Header(None),
     db: AsyncSession = Depends(get_db),
 ):
     user = await get_current_user_from_header(authorization, db)
@@ -120,13 +140,23 @@ async def update_chat(
     await db.commit()
     await db.refresh(chat)
 
-    return chat
+    # Return chat without messages to avoid lazy-loading issues
+    response = ChatResponse(
+        id=chat.id,
+        user_id=chat.user_id,
+        title=chat.title,
+        model=chat.model,
+        created_at=chat.created_at,
+        updated_at=chat.updated_at,
+        messages=[]
+    )
+    return response
 
 
 @router.delete("/{chat_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_chat(
     chat_id: str,
-    authorization: str = None,
+    authorization: str = Header(None),
     db: AsyncSession = Depends(get_db),
 ):
     user = await get_current_user_from_header(authorization, db)
@@ -139,5 +169,5 @@ async def delete_chat(
     if not chat:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found")
 
-    await db.delete(chat)
+    await db.execute(delete(Chat).where(Chat.id == chat_id))
     await db.commit()

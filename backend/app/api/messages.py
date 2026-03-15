@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from datetime import datetime
 from app.core.database import get_db
 from app.models import Chat, Message, User
 from app.schemas.chat import MessageCreateRequest, MessageResponse
@@ -11,7 +12,7 @@ router = APIRouter(prefix="/messages", tags=["messages"])
 
 
 async def get_current_user_from_header(
-    authorization: str = None, db: AsyncSession = Depends(get_db)
+    authorization: str = Header(None), db: AsyncSession = Depends(get_db)
 ) -> User:
     """Extract user from Authorization header"""
     if not authorization or not authorization.startswith("Bearer "):
@@ -32,7 +33,7 @@ async def get_current_user_from_header(
 @router.get("/{chat_id}", response_model=list[MessageResponse])
 async def get_messages(
     chat_id: str,
-    authorization: str = None,
+    authorization: str = Header(None),
     db: AsyncSession = Depends(get_db),
 ):
     user = await get_current_user_from_header(authorization, db)
@@ -58,7 +59,7 @@ async def get_messages(
 async def stream_message(
     chat_id: str,
     message_data: MessageCreateRequest,
-    authorization: str = None,
+    authorization: str = Header(None),
     db: AsyncSession = Depends(get_db),
 ):
     """Stream message response from Claude"""
@@ -103,7 +104,7 @@ async def stream_message(
         await db.commit()
 
         # Update chat timestamp
-        chat.updated_at = __import__("datetime").datetime.utcnow()
+        chat.updated_at = datetime.utcnow()
         await db.commit()
 
     return StreamingResponse(generate(), media_type="text/event-stream")

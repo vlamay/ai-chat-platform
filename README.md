@@ -6,12 +6,12 @@ A fullstack AI chat application with real-time streaming responses from Claude A
 
 ## Features
 
-✨ **Real-time AI Chat**: Stream responses from Claude API directly to your browser
-🔐 **User Authentication**: Register, login, and secure JWT-based sessions
-💬 **Chat History**: Persistent conversations stored in PostgreSQL
-🎯 **Model Selection**: Choose between claude-haiku (fast) and claude-sonnet (quality)
-📱 **Responsive Design**: Mobile-first UI with TailwindCSS
-🌓 **Dark Mode**: Built-in dark/light theme support
+**Real-time AI Chat**: Stream responses from Claude API directly to your browser
+**User Authentication**: Register, login, and secure JWT-based sessions
+**Chat History**: Persistent conversations stored in PostgreSQL
+**Model Selection**: Choose between claude-haiku (fast) and claude-sonnet (quality)
+**Responsive Design**: Mobile-first UI with TailwindCSS
+**Dark Mode**: Built-in dark/light theme support
 
 ## Tech Stack
 
@@ -370,12 +370,12 @@ pip install -r requirements.txt
 
 ## Security
 
-- ✅ JWT authentication with refresh tokens
-- ✅ Password hashing with bcrypt
-- ✅ CORS protection
-- ✅ SQL injection prevention (SQLAlchemy ORM)
-- ✅ XSS protection (React escaping)
-- ✅ Input validation (Pydantic)
+- JWT authentication with refresh tokens
+- Password hashing with bcrypt
+- CORS protection
+- SQL injection prevention (SQLAlchemy ORM)
+- XSS protection (React escaping)
+- Input validation (Pydantic)
 
 ## Future Enhancements
 
@@ -403,5 +403,3 @@ MIT License - see LICENSE file for details
 - Portfolio: [vlamay.github.io](https://vlamay.github.io)
 
 ---
-
-**Built with ❤️ for portfolio demonstration**

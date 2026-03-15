@@ -19,6 +19,12 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     PROJECT_NAME: str = "AI Chat Platform"
     VERSION: str = "1.0.0"
+    # Debug mode - True if DEBUG env var is set OR if not on Railway
+    DEBUG: bool = os.getenv("DEBUG", "").lower() in ("true", "1") or "railway" not in os.getenv("RAILWAY_ENVIRONMENT_NAME", "").lower()
+
+    # Server
+    PORT: int = int(os.getenv("PORT", "8000"))
+    HOST: str = os.getenv("HOST", "0.0.0.0")
 
     # Claude API
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
@@ -30,6 +36,7 @@ class Settings(BaseSettings):
         "http://localhost",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
+        "https://ai-chat-platform-liard.vercel.app",
     ]
 
     class Config:

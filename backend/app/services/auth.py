@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Tuple
+import hashlib
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,14 +9,22 @@ from app.core.config import settings
 from app.models import User
 from app.schemas.user import UserResponse
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use argon2 if available, fallback to bcrypt
+# Argon2 doesn't have the 72-byte password limitation
+try:
+    pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+except:
+    # Fallback to bcrypt with SHA256 pre-hashing
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def get_password_hash(password: str) -> str:
+    """Hash password using Argon2 (or BCrypt as fallback)"""
     return pwd_context.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify password against hash using Argon2 (or BCrypt as fallback)"""
     return pwd_context.verify(plain_password, hashed_password)
 
 

@@ -1,5 +1,5 @@
 import apiClient from "./client";
-import { Chat, ChatListItem, Message } from "../types";
+import type { Chat, ChatListItem, Message } from "../types";
 
 export const chatsAPI = {
   createChat: async (title: string, model: string): Promise<Chat> => {

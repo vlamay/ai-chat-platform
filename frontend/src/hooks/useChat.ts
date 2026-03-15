@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
 import { chatsAPI } from "../api/chats";
-import { Chat, Message } from "../types";
+import type { Chat, ChatListItem, Message } from "../types";
 
 export const useChat = () => {
-  const [chats, setChats] = useState<Chat[]>([]);
+  const [chats, setChats] = useState<ChatListItem[]>([]);
   const [currentChat, setCurrentChat] = useState<Chat | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,15 @@ export const useChat = () => {
     try {
       setLoading(true);
       const chat = await chatsAPI.createChat(title, model);
-      setChats((prev) => [chat, ...prev]);
+      const chatItem: ChatListItem = {
+        id: chat.id,
+        title: chat.title,
+        model: chat.model,
+        created_at: chat.created_at,
+        updated_at: chat.updated_at,
+        message_count: 0,
+      };
+      setChats((prev) => [chatItem, ...prev]);
       setCurrentChat(chat);
       setMessages([]);
       return chat;

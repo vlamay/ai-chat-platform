@@ -1,5 +1,5 @@
 import apiClient from "./client";
-import { TokenResponse } from "../types";
+import type { TokenResponse } from "../types";
 
 export const authAPI = {
   register: async (email: string, name: string, password: string): Promise<TokenResponse> => {
