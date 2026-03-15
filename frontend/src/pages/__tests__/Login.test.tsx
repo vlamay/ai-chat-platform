@@ -1,8 +1,7 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { Login } from '../Login'
-import * as authStore from '../../store/authStore'
 
 // Mock the auth store
 vi.mock('../../store/authStore', () => ({
@@ -75,7 +74,7 @@ describe('Login', () => {
   it('redirects to / on successful login', async () => {
     const { authAPI } = await import('../../api/auth')
     vi.mocked(authAPI.login).mockResolvedValueOnce({
-      user: { id: '1', email: 'test@example.com' },
+      user: { id: '1', email: 'test@example.com', name: 'Test User', created_at: '2024-03-15T10:00:00Z' },
       access_token: 'token123',
       refresh_token: 'refresh123',
     })
@@ -101,11 +100,10 @@ describe('Login', () => {
 
   it('disables button during loading', async () => {
     const { authAPI } = await import('../../api/auth')
-    let resolveLogin: any
     vi.mocked(authAPI.login).mockImplementationOnce(
       () =>
-        new Promise((resolve) => {
-          resolveLogin = resolve
+        new Promise(() => {
+          // Intentionally not resolving to keep loading state
         })
     )
 

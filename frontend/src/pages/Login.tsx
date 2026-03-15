@@ -20,8 +20,9 @@ export const Login: React.FC = () => {
       const data = await authAPI.login(email, password);
       setAuth(data.user, data.access_token, data.refresh_token);
       navigate("/");
-    } catch (err: any) {
-      setError(err.response?.data?.detail || "Login failed");
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { detail?: string } } };
+      setError(error.response?.data?.detail || "Login failed");
     } finally {
       setLoading(false);
     }

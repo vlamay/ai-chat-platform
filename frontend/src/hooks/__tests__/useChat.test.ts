@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { renderHook, act } from '@testing-library/react'
 import { useChat } from '../useChat'
 
 // Mock the chats API
@@ -46,6 +46,7 @@ describe('useChat', () => {
     const { chatsAPI } = await import('../../api/chats')
     const mockChat = {
       id: 'chat-new',
+      user_id: 'user-1',
       title: 'New Chat',
       model: 'claude-3-sonnet-20240229',
       created_at: '2024-03-15T10:00:00Z',
@@ -73,6 +74,7 @@ describe('useChat', () => {
     const { chatsAPI } = await import('../../api/chats')
     const mockChat = {
       id: 'chat-1',
+      user_id: 'user-1',
       title: 'Chat 1',
       model: 'claude-3-sonnet-20240229',
       created_at: '2024-03-15T10:00:00Z',
@@ -83,7 +85,7 @@ describe('useChat', () => {
       {
         id: 'msg-1',
         chat_id: 'chat-1',
-        role: 'user',
+        role: 'user' as const,
         content: 'Hello',
         created_at: '2024-03-15T10:00:00Z',
       },
@@ -122,7 +124,7 @@ describe('useChat', () => {
 
     // Set initial chats
     await act(async () => {
-      result.current.chats as any = [
+      ;(result.current.chats as typeof result.current.chats) = [
         {
           id: 'chat-1',
           title: 'Chat 1',
@@ -149,6 +151,7 @@ describe('useChat', () => {
 
     const mockChat = {
       id: 'chat-1',
+      user_id: 'user-1',
       title: 'Chat 1',
       model: 'claude-3-sonnet-20240229',
       created_at: '2024-03-15T10:00:00Z',
@@ -158,7 +161,7 @@ describe('useChat', () => {
 
     // Set current chat
     await act(async () => {
-      result.current.currentChat = mockChat as any
+      result.current.currentChat = mockChat
     })
 
     // Initial messages should be empty

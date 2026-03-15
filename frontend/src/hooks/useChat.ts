@@ -14,7 +14,7 @@ export const useChat = () => {
       setLoading(true);
       const data = await chatsAPI.listChats();
       setChats(data);
-    } catch (err) {
+    } catch {
       setError("Failed to load chats");
     } finally {
       setLoading(false);
@@ -37,7 +37,7 @@ export const useChat = () => {
       setCurrentChat(chat);
       setMessages([]);
       return chat;
-    } catch (err) {
+    } catch {
       setError("Failed to create chat");
       return null;
     } finally {
@@ -52,7 +52,7 @@ export const useChat = () => {
       const msgs = await chatsAPI.getMessages(chatId);
       setCurrentChat(chat);
       setMessages(msgs);
-    } catch (err) {
+    } catch {
       setError("Failed to load chat");
     } finally {
       setLoading(false);
@@ -126,7 +126,7 @@ export const useChat = () => {
           const filtered = prev.filter((m) => m.id !== "streaming");
           return [...filtered, assistantMessage];
         });
-      } catch (err) {
+      } catch {
         setError("Failed to send message");
       } finally {
         setLoading(false);
@@ -143,7 +143,7 @@ export const useChat = () => {
         setCurrentChat(null);
         setMessages([]);
       }
-    } catch (err) {
+    } catch {
       setError("Failed to delete chat");
     }
   }, [currentChat]);

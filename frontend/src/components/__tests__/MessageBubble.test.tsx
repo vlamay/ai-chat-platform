@@ -30,7 +30,7 @@ describe('MessageBubble', () => {
 
     render(<MessageBubble message={message} />)
 
-    const container = screen.getByText(/Bold text/).parentElement
+    const container = screen.getByText(/Bold text/)?.parentElement?.parentElement
     expect(container).toHaveClass('prose')
   })
 
