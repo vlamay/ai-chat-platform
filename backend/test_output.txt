@@ -1,4 +1,0 @@
-ImportError while loading conftest 'C:\Users\VladyslavMaidaniuk\Documents\claude\ai-chat-platform-1\backend\tests\conftest.py'.
-tests\conftest.py:5: in <module>
-    from fastapi_cache2 import FastAPICache
-E   ModuleNotFoundError: No module named 'fastapi_cache2'
