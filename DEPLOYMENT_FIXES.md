@@ -73,8 +73,58 @@ alembic upgrade head  # Second run - should skip table creation gracefully
 ✅ **Graceful failure** - App starts even if migrations have issues
 ✅ **Production ready** - Handles real-world deployment scenarios
 
+## Additional Fixes Applied
+
+### 3. **Lazy Redis Import** (`backend/app/core/cache.py`)
+- Problem: Redis was imported at module level, causing `ModuleNotFoundError` if redis-py not installed
+- Solution: Moved Redis imports inside `init_cache()` function (lazy loading)
+- Result: App starts even without Redis, cache initialization is optional
+
+```python
+async def init_cache():
+    try:
+        # Lazy imports - only imported when actually needed
+        from fastapi_cache import FastAPICache
+        from fastapi_cache.backends.redis import RedisBackend
+        from redis import asyncio as aioredis
+        ...
+    except ImportError:
+        # Redis not installed - gracefully handle
+        logger.warning("Redis client not installed")
+        return None
+```
+
+### 4. **Better Migration Table Checks** (`backend/alembic/versions/001_initial_schema.py`)
+- Problem: Generic exception handling was causing transaction abort when DuplicateTable occurred
+- Solution: Check if table exists using `inspect()` before attempting creation
+- Result: Migrations are truly idempotent - no transaction abort, no cascade failures
+
+```python
+def table_exists(table_name: str) -> bool:
+    bind = op.get_bind()
+    inspector = inspect(bind)
+    return table_name in inspector.get_table_names()
+
+if not table_exists('users'):
+    op.create_table(...)
+```
+
+### 5. **Added redis-py Package** (`backend/requirements.txt`)
+- Added `redis==5.0.0` to requirements
+- Ensures Redis client is available in production environment
+
+## Issues Fixed in Logs
+
+| Error | Root Cause | Solution |
+|-------|-----------|----------|
+| `DuplicateTableError` | Tables already exist, migration tries to create them again | Made migrations idempotent with table existence checks |
+| `InFailedSQLTransactionError` | Transaction aborted after DuplicateTable, cascade failure on `INSERT alembic_version` | Proper table checking prevents transaction errors |
+| `ModuleNotFoundError: No module named 'redis'` | Redis imported at module level during app startup | Lazy loading in `init_cache()` function |
+
 ## Related Issues
 
 - Fixed logs indicating `DuplicateTableError` in production
 - Prevents deployment failures on container restarts
 - Allows smooth rolling updates without downtime
+- App gracefully continues without Redis if not available
+- Migration transactions never abort due to duplicate tables
